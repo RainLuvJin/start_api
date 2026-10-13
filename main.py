@@ -68,9 +68,11 @@ def get_session(session_id: str):
 
 @app.delete("/sessions/{session_id}")
 def delete_session(session_id: str):
-    if session_id in sessions:
+    if session_id not in sessions:
+        raise HTTPException(
+            404,
+            "Session not found"
+        )
         # 问题6：如何删除字典一条值
-        sessions.pop(session_id)
-        return {"session_id": session_id, "status":"deleted"}
-    else:
-        return("该会话不存在。")
+    sessions.pop(session_id)
+    return {"session_id": session_id, "status":"deleted"}
