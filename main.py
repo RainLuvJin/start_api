@@ -1,7 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from uuid import uuid4
-
 
 app = FastAPI()
 
@@ -41,33 +39,38 @@ def get_user(user_id: int):
         )
     return {"user_id":user_id, "name":"Jinny"}
 
-
+# 问题1：如何由后端生成用户id？
+from uuid import uuid4
 sessions = {}
-
-class session(BaseModel):
+# 问题2：Python的类名通常采用PascalCase大驼峰命名法。
+class SessionCreateRequest(BaseModel):
     username : str
     info : str
 
 @app.post("/sessions")
-def create_session(data: session):
+def create_session(data: SessionCreateRequest):
     session_id = str(uuid4())
-    # problem: 我不会生成sessioniD，只会传参。
-    如果字典里sessioniD是唯一的：
-        sessions[session_id] = {"username":data.username,"info":data.info}
-    如果不唯一：
-        return("sessionid已存在，请重新键入")
+    sessions[session_id] = {"username":data.username,"info":data.info}
     return {"session_id": session_id, "status":"created"}
 
 @app.get("/sessions/{session_id}")
 def get_session(session_id: str):
-    if id不存在：
+    # 问题3：如果x不在一个集合里if x not in list:
+    if session_id not in sessions:
         raise HTTPException(
             404,
-            "id not found"
+            "Session not found"
         )
-    return {"session_id": session_id, "username":sessions[session_id]["username"],"info":sessions[session_id]["info"]}
+    # 问题4：pydantic类模型使用属性才用. 比如data.username；字典里索引key用[]
+    # 问题5：可以直接返回保存了完整记录的字典
+    else:
+        return sessions[session_id]
 
 @app.delete("/sessions/{session_id}")
 def delete_session(session_id: str):
-    sessions[session_id] = None
-    return {"session_id": session_id, "status":"deleted"}
+    if session_id in sessions:
+        # 问题6：如何删除字典一条值
+        sessions.pop(session_id)
+        return {"session_id": session_id, "status":"deleted"}
+    else:
+        return("该会话不存在。")
