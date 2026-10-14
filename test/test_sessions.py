@@ -7,8 +7,8 @@ client = TestClient(app)
 
 
 def test_create_session():
-    sessions.clear()
-
+    sessions.clear() # 先清空字典里的全部内容
+    # 用客户端发个post请求
     response = client.post(
         "/sessions",
         json={
